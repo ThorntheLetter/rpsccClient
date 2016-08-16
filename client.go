@@ -52,7 +52,7 @@ func main() {
 				fmt.Println(err.Error())
 			}
 
-			for i := 0; i < 99; i += 1 {
+			for i := 0; i < 100; i += 1 {
 				choice, err := userOut.ReadString('\n')
 				if err != nil {
 					fmt.Println(err.Error())
