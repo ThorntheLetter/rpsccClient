@@ -22,6 +22,24 @@ func disconnected() {
 func main() {
 	// user's program io setup
 	userName := os.Args[1]
+
+	if userName == "cody" {
+		connection, err := net.Dial("tcp", "localhost:3489")
+		if err != nil {
+			fmt.Println("unable to connect to server") // this error is connection problems
+			os.Exit(1)
+		}
+		r := bufio.NewReader(connection)
+		for {
+			q, err := r.ReadString('\n')
+			if err != nil {
+				os.Exit(0)
+			}
+			fmt.Printf(q)
+		}
+
+	}
+
 	userProgram := os.Args[2]
 	userArgs := os.Args[3:]
 	userCmd := exec.Command(userProgram, userArgs...)
