@@ -8,6 +8,17 @@ import (
 	"os/exec"
 )
 
+func userErrorHandler(e error) { // this gives the user the error because i have no idea what would actually cause these
+	fmt.Println(e.Error())
+	fmt.Println("something probably went wrong with your program, check above for possible details")
+	os.Exit(1)
+}
+
+func disconnected() {
+	fmt.Println("you probably have been disconnected")
+	os.Exit(2) // still on the fence about whether this should exit or break
+}
+
 func main() {
 	// user's program io setup
 	userName := os.Args[1]
@@ -16,63 +27,71 @@ func main() {
 	userCmd := exec.Command(userProgram, userArgs...)
 	userOutPipe, err := userCmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err.Error())
+		userErrorHandler(err)
 	}
 	userOut := bufio.NewReader(userOutPipe)
 
 	userInPipe, err := userCmd.StdinPipe()
 	if err != nil {
-		fmt.Println(err.Error())
+		userErrorHandler(err)
 	}
 
 	err = userCmd.Start()
 	if err != nil {
-		fmt.Println(err)
+		userErrorHandler(err)
 	}
 
 	// network setup
 	connection, err := net.Dial("tcp", "localhost:7633")
 	if err != nil {
-		fmt.Println(err.Error()) // this error is connection problems
+		fmt.Println("unable to connect to server") // this error is connection problems
+		os.Exit(1)
 	}
 	defer connection.Close()
 	netReader := bufio.NewReader(connection)
-	connection.Write([]byte(userName + "\n")) // send name
+	_, err = connection.Write([]byte(userName + "\n")) // send name
+	if err != nil {
+		disconnected()
+	}
 
+	// the loop
 	for {
 		recieved, err := netReader.ReadString('\n')
 		if err != nil {
-			fmt.Println(err.Error())
+			disconnected()
 		}
 		if recieved == "6\n" {
 			fmt.Printf("%s", recieved)
 
 			_, err = userInPipe.Write([]byte(recieved))
 			if err != nil {
-				fmt.Println(err.Error())
+				userErrorHandler(err)
 			}
 
 			for i := 0; i < 100; i += 1 {
-				choice, err := userOut.ReadString('\n')
+				choice, err := userOut.ReadString('\n') // read user choice
 				if err != nil {
-					fmt.Println(err.Error())
+					userErrorHandler(err)
 				}
-				fmt.Printf(choice)
-				_, err = connection.Write([]byte(choice))
+				fmt.Printf(choice)                        // print user choice
+				_, err = connection.Write([]byte(choice)) // send user choice
 				if err != nil {
-					fmt.Println(err.Error())
+					disconnected()
 				}
 
-				opChoice, err := netReader.ReadString('\n')
+				opChoice, err := netReader.ReadString('\n') // recieve opponents choice
 				if err != nil {
-					fmt.Println(err.Error())
+					disconnected()
 				}
+
 				fmt.Printf(opChoice)
-				_, err = userInPipe.Write([]byte(opChoice))
+				_, err = userInPipe.Write([]byte(opChoice)) // give user the opponents choice
 				if err != nil {
-					fmt.Println(err)
+					userErrorHandler(err)
 				}
-
+				if opChoice == "0\n" || choice == "0\n" { // end loop if user forfeited
+					break
+				}
 			}
 		}
 	}
