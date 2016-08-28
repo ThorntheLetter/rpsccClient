@@ -89,7 +89,14 @@ func main() {
 				if err != nil {
 					userErrorHandler(err)
 				}
-				if opChoice == "0\n" || choice == "0\n" { // end loop if user forfeited
+
+				forfeit := false
+				switch choice {
+				case "1\n", "2\n", "3\n", "4\n", "5\n":
+				default:
+					forfeit = true
+				}
+				if opChoice == "0\n" || forfeit { // end loop if user forfeited
 					break
 				}
 			}
