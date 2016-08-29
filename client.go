@@ -24,7 +24,7 @@ func main() {
 	userName := os.Args[1]
 
 	if userName == "cody" {
-		connection, err := net.Dial("tcp", "localhost:3489")
+		connection, err := net.Dial("tcp", "rpscc.thebelligerentone.com:3489")
 		if err != nil {
 			fmt.Println("unable to connect to server") // this error is connection problems
 			os.Exit(1)
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	// network setup
-	connection, err := net.Dial("tcp", "localhost:7633")
+	connection, err := net.Dial("tcp", "rpscc.thebelligerentone.com:7633")
 	if err != nil {
 		fmt.Println("unable to connect to server") // this error is connection problems
 		os.Exit(1)
