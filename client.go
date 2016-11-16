@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 const codyPort = ":3489"
@@ -97,6 +98,7 @@ func main() {
 					userErrorHandler(err)
 				}
 				fmt.Printf(choice)                        // print user choice
+				choice = strings.TrimSpace(choice) + "\n"// windows line endings
 				_, err = connection.Write([]byte(choice)) // send user choice
 				if err != nil {
 					disconnected()
