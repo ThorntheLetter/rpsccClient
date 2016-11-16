@@ -8,6 +8,9 @@ import (
 	"os/exec"
 )
 
+const codyPort = ":3489"
+const gamePort = ":7633"
+
 func userErrorHandler(e error) { // this gives the user the error because i have no idea what would actually cause these
 	fmt.Println(e.Error())
 	fmt.Println("something probably went wrong with your program, check above for possible details")
@@ -20,11 +23,13 @@ func disconnected() {
 }
 
 func main() {
+	address := os.Args[1]
+
 	// user's program io setup
-	userName := os.Args[1]
+	userName := os.Args[2]
 
 	if userName == "cody" {
-		connection, err := net.Dial("tcp", "localhost:3489")
+		connection, err := net.Dial("tcp", address+codyPort)
 		if err != nil {
 			fmt.Println("unable to connect to server") // this error is connection problems
 			os.Exit(1)
@@ -40,8 +45,8 @@ func main() {
 
 	}
 
-	userProgram := os.Args[2]
-	userArgs := os.Args[3:]
+	userProgram := os.Args[3]
+	userArgs := os.Args[4:]
 	userCmd := exec.Command(userProgram, userArgs...)
 	userOutPipe, err := userCmd.StdoutPipe()
 	if err != nil {
@@ -60,7 +65,7 @@ func main() {
 	}
 
 	// network setup
-	connection, err := net.Dial("tcp", "localhost:7633")
+	connection, err := net.Dial("tcp", address+gamePort)
 	if err != nil {
 		fmt.Println("unable to connect to server") // this error is connection problems
 		os.Exit(1)
